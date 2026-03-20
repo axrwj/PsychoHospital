@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Психо-Учет</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-4xl font-bold mb-8 text-center">🏥 Психо-Учет</h1>
+
+        <div class="grid grid-cols-2 gap-4 mb-8 max-w-md mx-auto">
+            <div class="bg-gray-800 p-4 rounded-lg text-center">
+                <div class="text-2xl font-bold text-blue-400">{{ total }}</div>
+                <div class="text-gray-400">Всего пациентов</div>
+            </div>
+            <div class="bg-gray-800 p-4 rounded-lg text-center">
+                <div class="text-2xl font-bold text-green-400">{{ active }}</div>
+                <div class="text-gray-400">Активных</div>
+            </div>
+        </div>
+
+        <div class="flex flex-wrap gap-4 mb-8 justify-center">
+            <form action="/" method="GET" class="flex gap-2">
+                <input type="text" name="search" value="{{ search }}"
+                       placeholder="Поиск по ФИО..."
+                       class="px-4 py-2 bg-gray-800 rounded-lg border border-gray-700 focus:outline-none focus:border-blue-500">
+                <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg">🔍 Найти</button>
+            </form>
+            {% if search %}
+                <a href="/" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg">🔄 Сбросить</a>
+            {% endif %}
+            <a href="/logs" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg">📝 Журнал</a>
+            <button onclick="document.getElementById('addPatientModal').classList.remove('hidden')"
+                    class="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg">➕ Добавить пациента</button>
+        </div>
+
+        <div class="bg-gray-800 rounded-lg overflow-hidden">
+            <div class="p-4 border-b border-gray-700">
+                <h2 class="text-2xl font-bold">📋 Список пациентов</h2>
+                {% if search %}
+                    <p class="text-gray-400 mt-2">Результаты поиска: "{{ search }}"</p>
+                {% endif %}
+            </div>
+
+            <div class="overflow-x-auto">
+                {% if patients %}
+                    <table class="w-full">
+                        <thead class="bg-gray-700">
+                            <tr>
+                                <th class="px-4 py-3 text-left">ФИО</th>
+                                <th class="px-4 py-3 text-left">Дата рождения</th>
+                                <th class="px-4 py-3 text-left">Палата</th>
+                                <th class="px-4 py-3 text-left">Диагноз</th>
+                                <th class="px-4 py-3 text-left">Статус</th>
+                                <th class="px-4 py-3 text-left">Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for patient in patients %}
+                                <tr class="border-b border-gray-700 hover:bg-gray-750">
+                                    <td class="px-4 py-3">{{ patient.full_name }}</td>
+                                    <td class="px-4 py-3 text-gray-400">{{ patient.birth_date or 'Не указана' }}</td>
+                                    <td class="px-4 py-3">{{ patient.ward_number }}</td>
+                                    <td class="px-4 py-3">{{ patient.diagnosis }}</td>
+                                    <td class="px-4 py-3">
+                                        {% if patient.status == 'Активен' %}
+                                            <span class="text-green-400">{{ patient.status }}</span>
+                                        {% elif patient.status == 'Выписан' %}
+                                            <span class="text-blue-400">{{ patient.status }}</span>
+                                        {% else %}
+                                            <span class="text-orange-400">{{ patient.status }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <div class="flex gap-2">
+                                            <a href="/edit/{{ patient.id }}" class="text-blue-400 hover:text-blue-300">✏️</a>
+                                            <a href="/patient/{{ patient.id }}/logs" class="text-purple-400 hover:text-purple-300">📝</a>
+                                            <form action="/delete/{{ patient.id }}" method="POST" class="inline"
+                                                  onsubmit="return confirm('Вы действительно хотите удалить пациента?')">
+                                                <button type="submit" class="text-red-400 hover:text-red-300">🗑️</button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <div class="p-8 text-center text-gray-400">📭 Нет пациентов в базе</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div id="addPatientModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-gray-800 rounded-lg p-8 max-w-lg w-full mx-4">
+            <h2 class="text-2xl font-bold mb-6">➕ Новый пациент</h2>
+            <form action="/add_patient" method="POST">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-gray-400 mb-2">ФИО *</label>
+                        <input type="text" name="full_name" required
+                               class="w-full px-4 py-2 bg-gray-700 rounded-lg border border-gray-600 focus:outline-none focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-gray-400 mb-2">Дата рождения</label>
+                        <input type="text" name="birth_date" placeholder="ДД.ММ.ГГГГ"
+                               class="w-full px-4 py-2 bg-gray-700 rounded-lg border border-gray-600 focus:outline-none focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-gray-400 mb-2">Палата *</label>
+                        <input type="text" name="ward_number" required
+                               class="w-full px-4 py-2 bg-gray-700 rounded-lg border border-gray-600 focus:outline-none focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-gray-400 mb-2">Диагноз *</label>
+                        <input type="text" name="diagnosis" required
+                               class="w-full px-4 py-2 bg-gray-700 rounded-lg border border-gray-600 focus:outline-none focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-gray-400 mb-2">Статус</label>
+                        <select name="status" class="w-full px-4 py-2 bg-gray-700 rounded-lg border border-gray-600 focus:outline-none focus:border-blue-500">
+                            <option value="Активен">Активен</option>
+                            <option value="Выписан">Выписан</option>
+                            <option value="Переведен">Переведен</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex gap-4 mt-6">
+                    <button type="submit" class="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg">💾 Сохранить</button>
+                    <button type="button" onclick="document.getElementById('addPatientModal').classList.add('hidden')"
+                            class="flex-1 px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg">Отмена</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

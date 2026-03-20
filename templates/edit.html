@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Редактирование пациента - Психо-Учет</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-4xl font-bold">✏️ Редактирование пациента</h1>
+            <a href="/" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg">← Назад</a>
+        </div>
+
+        <div class="bg-gray-800 rounded-lg p-8 max-w-2xl mx-auto">
+            <form action="/edit/{{ patient.id }}" method="POST">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-gray-400 mb-2">ФИО *</label>
+                        <input type="text" name="full_name" value="{{ patient.full_name }}" required
+                               class="w-full px-4 py-2 bg-gray-700 rounded-lg border border-gray-600 focus:outline-none focus:border-blue-500">
+                    </div>
+
+                    <div>
+                        <label class="block text-gray-400 mb-2">Дата рождения</label>
+                        <input type="text" name="birth_date" value="{{ patient.birth_date or '' }}" placeholder="ДД.ММ.ГГГГ"
+                               class="w-full px-4 py-2 bg-gray-700 rounded-lg border border-gray-600 focus:outline-none focus:border-blue-500">
+                    </div>
+
+                    <div>
+                        <label class="block text-gray-400 mb-2">Палата *</label>
+                        <input type="text" name="ward_number" value="{{ patient.ward_number }}" required
+                               class="w-full px-4 py-2 bg-gray-700 rounded-lg border border-gray-600 focus:outline-none focus:border-blue-500">
+                    </div>
+
+                    <div>
+                        <label class="block text-gray-400 mb-2">Диагноз *</label>
+                        <input type="text" name="diagnosis" value="{{ patient.diagnosis }}" required
+                               class="w-full px-4 py-2 bg-gray-700 rounded-lg border border-gray-600 focus:outline-none focus:border-blue-500">
+                    </div>
+
+                    <div>
+                        <label class="block text-gray-400 mb-2">Статус</label>
+                        <select name="status" class="w-full px-4 py-2 bg-gray-700 rounded-lg border border-gray-600 focus:outline-none focus:border-blue-500">
+                            <option value="Активен" {% if patient.status == 'Активен' %}selected{% endif %}>Активен</option>
+                            <option value="Выписан" {% if patient.status == 'Выписан' %}selected{% endif %}>Выписан</option>
+                            <option value="Переведен" {% if patient.status == 'Переведен' %}selected{% endif %}>Переведен</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="flex gap-4 mt-6">
+                    <button type="submit" class="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg font-bold">💾 Сохранить изменения</button>
+                    <a href="/" class="flex-1 px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg text-center">Отмена</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
